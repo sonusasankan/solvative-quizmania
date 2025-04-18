@@ -1,4 +1,4 @@
-import { Loader2, BookOpen } from 'lucide-react';
+import { Loader2} from 'lucide-react';
 
 export const QuizLoading: React.FC = () => (
     <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">

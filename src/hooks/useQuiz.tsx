@@ -1,8 +1,9 @@
 
 import { QuizData } from "../types/quizTypes";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Question } from "../types/quizTypes";
 
-export const useQuiz = (initialQuizData: QuizData) => {
+export const useQuiz = (initialQuizData: QuizData, selectedTopic: string) => {
     const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -13,10 +14,27 @@ export const useQuiz = (initialQuizData: QuizData) => {
     const [loading, setLoading] = useState(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const [quizStarted, setQuizStarted] = useState(false);
+    const [currentQuestions, setCurrentQuestions] = useState<Question[]>([]);
 
-    const currentCategory = initialQuizData.categories[currentCategoryIndex];
-    const currentQuestion = currentCategory?.questions[currentQuestionIndex];
-    const totalQuestions = initialQuizData.categories.reduce((acc, cat) => acc + cat.questions.length, 0);
+    // --- Filter questions by selected topic ---
+      useEffect(() => {
+        if (quizStarted) {
+            const category = initialQuizData.categories.find(cat => cat.id === selectedTopic);
+            if (category) {
+                setCurrentQuestions(category.questions);
+                setCurrentCategoryIndex(initialQuizData.categories.findIndex(cat => cat.id === selectedTopic));
+                setCurrentQuestionIndex(0);
+            }
+            else{
+              setCurrentQuestions([]);
+              setCurrentCategoryIndex(0);
+              setCurrentQuestionIndex(0)
+            }
+        }
+    }, [selectedTopic, quizStarted, initialQuizData]);
+
+    const currentQuestion = currentQuestions[currentQuestionIndex];
+    const totalQuestions = currentQuestions.length;
 
     // --- Timer Logic ---
     useEffect(() => {
@@ -26,8 +44,9 @@ export const useQuiz = (initialQuizData: QuizData) => {
             }, 1000);
         } else if (timeLeft === 0) {
             handleAnswerSelection(null); // Auto-submit on timeout
+            submitAnswer(true); // Pass true to indicate it's a timeout
         }
-
+    
         return () => {
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
@@ -40,8 +59,6 @@ export const useQuiz = (initialQuizData: QuizData) => {
         setQuizStarted(true);
         setQuizCompleted(false);
         setScore(0);
-        setCurrentCategoryIndex(0);
-        setCurrentQuestionIndex(0);
         setSelectedAnswer(null);
         if (currentQuestion) {
             setTimeLeft(currentQuestion.timeLimit);
@@ -50,10 +67,10 @@ export const useQuiz = (initialQuizData: QuizData) => {
 
     // --- Reset Timer on Question Change ---
     useEffect(() => {
-        if (quizStarted && currentQuestion) {
-            setTimeLeft(currentQuestion.timeLimit);
+        if (quizStarted && currentQuestions.length > 0) {
+            setTimeLeft(currentQuestions[currentQuestionIndex]?.timeLimit || 0);
         }
-    }, [currentQuestion, currentQuestionIndex, quizStarted]);
+    }, [currentQuestionIndex, currentQuestions, quizStarted]);
 
     // --- Answer Selection & Handling ---
     const handleAnswerSelection = useCallback((answer: string | null) => {
@@ -63,26 +80,22 @@ export const useQuiz = (initialQuizData: QuizData) => {
         }
     }, []);
 
-    const submitAnswer = useCallback(() => {
-        if (selectedAnswer === null) return;
-
+    const submitAnswer = useCallback((isTimeout = false) => {
+        if (selectedAnswer === null && !isTimeout) return;
+    
         if (selectedAnswer === currentQuestion?.correctAnswer) {
             setScore(prevScore => prevScore + 1);
         }
-
-        if (currentQuestionIndex < currentCategory.questions.length - 1) {
+    
+        if (currentQuestionIndex < currentQuestions.length - 1) {
             setCurrentQuestionIndex(prevIndex => prevIndex + 1);
             setSelectedAnswer(null);
-        } else if (currentCategoryIndex < initialQuizData.categories.length - 1) {
-            setCurrentCategoryIndex(prevCategoryIndex => prevCategoryIndex + 1);
-            setCurrentQuestionIndex(0);
-            setSelectedAnswer(null);
-        }
-        else {
+            // Timer will be reset in the next useEffect triggered by currentQuestionIndex change
+        } else {
             setQuizCompleted(true);
             setTimeLeft(null);
         }
-    }, [initialQuizData, currentCategoryIndex, currentCategory?.questions.length, currentQuestion?.correctAnswer, currentQuestionIndex]);
+    }, [currentQuestion?.correctAnswer, currentQuestionIndex, currentQuestions.length, selectedAnswer]);
 
     // --- Restart Quiz ---
     const restartQuiz = () => {

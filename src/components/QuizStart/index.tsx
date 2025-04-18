@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { cn } from '../../utils/cn';
-import { BookOpen } from 'lucide-react';
+import logo from '../../assets/logo.png';
+
+import QuizRulesModal from '../QuizRulesModal';
+
 
 interface QuizStartProps {
     onStart: (name: string, topic: string) => void;
@@ -9,6 +12,8 @@ interface QuizStartProps {
 export const QuizStart: React.FC<QuizStartProps> = ({ onStart }) => {
     const [name, setName] = useState('');
     const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+    const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+
 
     const handleStart = () => {
         if (name.trim() && selectedTopic) {
@@ -24,13 +29,13 @@ export const QuizStart: React.FC<QuizStartProps> = ({ onStart }) => {
     ];
 
     return (
-        <div className="w-full max-w-md bg-white rounded-lg p-6 flex flex-col items-center m-auto">
-            <h2 className="text-3xl font-bold text-center mb-4 text-pink-600 font-outfit">
-                <BookOpen className="inline-block mr-2 w-8 h-8" />
-                Welcome to QUIZMania
+        <div className="w-500 rounded-lg p-6 flex flex-col items-center m-auto start-form">
+            <h2 className="text-5xl font-bold text-center mb-4 text-gray-800 font-outfit flex items-baseline-last">
+            Welcome  <img className='ml-2' src={logo} alt="App logo"/>
             </h2>
             <p className="text-center text-gray-700 mb-6 font-outfit">
-                Please read all the rules about this quiz before you start. <a href="#" className="text-blue-500 hover:underline">Quiz rules</a>
+                Please read all the rules about this quiz before you start. <button className='text-blue-400 cursor-pointer' onClick={() => setIsRulesModalOpen(true)}>Quiz Rules</button>
+
             </p>
 
             <div className="w-full mb-4">
@@ -47,7 +52,7 @@ export const QuizStart: React.FC<QuizStartProps> = ({ onStart }) => {
 
             <div className="w-full mb-6">
                 <p className="block text-gray-700 text-sm font-bold mb-2 font-outfit">Please select topic to continue</p>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2">
                     {topics.map((topic) => (
                         <label
                             key={topic.id}
@@ -84,6 +89,7 @@ export const QuizStart: React.FC<QuizStartProps> = ({ onStart }) => {
             >
                 Start Quiz
             </button>
+            <QuizRulesModal isOpen={isRulesModalOpen} onClose={() => setIsRulesModalOpen(false)} />
         </div>
     );
 };

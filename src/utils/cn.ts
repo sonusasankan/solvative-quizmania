@@ -1,13 +1,10 @@
-/**
- * Utility function to combine class names.
- * Safely handles multiple arguments and filters out falsy values.
- */
+
 export function cn(...inputs: any[]): string {
     const classes = [];
 
     for (let i = 0; i < inputs.length; i++) {
         const arg = inputs[i];
-        if (arg) { // Check for truthiness (null, undefined, false, '', 0 are all falsy)
+        if (arg) { 
             if (typeof arg === 'string') {
                 classes.push(arg);
             } else if (typeof arg === 'object') {
@@ -23,7 +20,7 @@ export function cn(...inputs: any[]): string {
                     }
                 }
             }
-            // other types are ignored
+           
         }
     }
     return classes.join(' ');

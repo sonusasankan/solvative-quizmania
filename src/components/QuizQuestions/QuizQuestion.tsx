@@ -21,7 +21,6 @@ export const QuizQuestion: React.FC<{
     return (
         <div className="w-full max-w-2xl bg-white rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-bold mb-4">
-                {/* Category Name could be passed here if you want to display it */}
                 Question {currentQuestionIndex + 1} / {totalQuestions}
             </h2>
             <QuizTimer timeLeft={timeLeft} />
@@ -29,7 +28,7 @@ export const QuizQuestion: React.FC<{
             <QuizOptions options={questionData.options} selectedAnswer={selectedAnswer} onAnswerChange={onAnswerChange} />
             <div className="flex justify-between mt-6">
                 <button
-                    onClick={() => setIsPaused(prev => !prev)} // Toggle pause
+                    onClick={() => setIsPaused(prev => !prev)}
                     className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
                 >
                     {isPaused ? 'Resume' : 'Pause'}

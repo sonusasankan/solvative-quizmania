@@ -5,9 +5,15 @@ import { QuizLoading } from './components/QuizLoading';
 import { QuizEnd } from './components/QuizEnd';
 import { NoQuestions } from './components/NoQuestions';
 import { QuizQuestion } from './components/QuizQuestions/QuizQuestion';
-import { quizData } from './data/quizData'; // Import your quiz data
+import { quizData } from './data/quizData';
+import { useState as reactUseState } from 'react';
+
+import Header from './components/ui/Header';
+
 
 const App: React.FC = () => {
+    const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+
     const {
         currentQuestion,
         currentQuestionIndex,
@@ -24,38 +30,42 @@ const App: React.FC = () => {
         submitAnswer,
         restartQuiz,
         setIsPaused
-    } = useQuiz(quizData); // Use the hook, passing in the data
+    } = useQuiz(quizData, selectedTopic!);
 
-    if (!quizStarted) {
-        return <QuizStart onStart={startQuiz} />;
+    const handleStartQuiz = (name: string, topic: string) => {
+        console.log(topic);
+        setSelectedTopic(topic);
+        startQuiz();
     }
-
-    if (loading) {
-        return <QuizLoading />;
-    }
-
-    if (quizCompleted) {
-        return <QuizEnd score={score} totalQuestions={totalQuestions} onRestart={restartQuiz} />;
-    }
-
-    if (!currentQuestion) {
-        return <NoQuestions />;
-    }
+    
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <QuizQuestion
-                questionData={currentQuestion}
-                selectedAnswer={selectedAnswer}
-                onAnswerChange={handleAnswerSelection}
-                timeLeft={timeLeft}
-                isPaused={isPaused}
-                onSubmit={submitAnswer}
-                currentQuestionIndex={currentQuestionIndex}
-                totalQuestions={totalQuestions}
-            />
+        <div className="flex flex-col min-h-screen">
+            <Header />
+            <div className="flex-grow flex items-center justify-center">
+                {!quizStarted && <QuizStart onStart={handleStartQuiz} />}
+                {loading && <QuizLoading />}
+                {quizCompleted && <QuizEnd score={score} totalQuestions={totalQuestions} onRestart={restartQuiz} />}
+                {!currentQuestion && quizStarted && !loading && !quizCompleted && <NoQuestions />}
+                {currentQuestion && !quizCompleted && (
+                    <QuizQuestion
+                        questionData={currentQuestion}
+                        selectedAnswer={selectedAnswer}
+                        onAnswerChange={handleAnswerSelection}
+                        timeLeft={timeLeft}
+                        isPaused={isPaused}
+                        onSubmit={submitAnswer}
+                        currentQuestionIndex={currentQuestionIndex}
+                        totalQuestions={totalQuestions}
+                    />
+                )}
+            </div>
         </div>
     );
 };
 
 export default App;
+
+function useState<T>(initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+    return reactUseState(initialValue);
+}
