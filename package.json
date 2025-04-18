@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@tailwindcss/cli": "^4.1.4",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -42,6 +43,10 @@
     ]
   },
   "devDependencies": {
-    "lucide-react": "^0.488.0"
+    "@tailwindcss/postcss": "^4.1.4",
+    "autoprefixer": "^10.4.21",
+    "lucide-react": "^0.488.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.4"
   }
 }
